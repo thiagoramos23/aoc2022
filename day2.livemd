@@ -1,0 +1,144 @@
+# Day 2
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.7.0"}
+])
+```
+
+## Section
+
+```elixir
+input = Kino.Input.textarea("Add the input:")
+```
+
+### Part 1
+
+```elixir
+defmodule Player do
+  defstruct [:move, :points]
+
+  def new(attr) do
+    move(attr)
+  end
+
+  defp move("A"), do: struct!(__MODULE__, %{move: :rock, points: 1})
+  defp move("B"), do: struct!(__MODULE__, %{move: :paper, points: 2})
+  defp move("C"), do: struct!(__MODULE__, %{move: :scissors, points: 3})
+  defp move("X"), do: struct!(__MODULE__, %{move: :rock, points: 1})
+  defp move("Y"), do: struct!(__MODULE__, %{move: :paper, points: 2})
+  defp move("Z"), do: struct!(__MODULE__, %{move: :scissors, points: 3})
+end
+```
+
+```elixir
+defmodule Game do
+  def match(player1, player2) do
+    cond do
+      winner(player1.move, player2.move) > 0 ->
+        6 + player2.points
+
+      winner(player1.move, player2.move) == 0 ->
+        player2.points
+
+      true ->
+        3 + player2.points
+    end
+  end
+
+  defp winner(:rock, :paper), do: 1
+  defp winner(:paper, :rock), do: 0
+
+  defp winner(:rock, :scissors), do: 0
+  defp winner(:scissors, :rock), do: 1
+
+  defp winner(:paper, :scissors), do: 1
+  defp winner(:scissors, :paper), do: 0
+
+  defp winner(move1, move2) when move1 == move2, do: -1
+end
+```
+
+```elixir
+input
+|> Kino.Input.read()
+|> String.split(["\n", "\s"])
+|> Enum.chunk_every(2)
+|> Enum.map(fn [move1, move2] ->
+  opponent = Player.new(move1)
+  me = Player.new(move2)
+  score = Game.match(opponent, me)
+  score
+end)
+|> Enum.sum()
+```
+
+### Part 2
+
+```elixir
+input = Kino.Input.textarea("Add the input:")
+```
+
+```elixir
+defmodule Player do
+  defstruct [:move, :points, :outcome]
+
+  def new(attr, outcome) do
+    struct = move(attr)
+    %{struct | outcome: get_outcome(outcome)}
+  end
+
+  defp move("A"), do: struct!(__MODULE__, %{move: :rock, points: 1})
+  defp move("B"), do: struct!(__MODULE__, %{move: :paper, points: 2})
+  defp move("C"), do: struct!(__MODULE__, %{move: :scissors, points: 3})
+
+  defp move(:rock), do: struct!(__MODULE__, %{move: :rock, points: 1})
+  defp move(:paper), do: struct!(__MODULE__, %{move: :paper, points: 2})
+  defp move(:scissors), do: struct!(__MODULE__, %{move: :scissors, points: 3})
+
+  defp get_outcome(outcome) when is_atom(outcome), do: outcome
+  defp get_outcome("X"), do: :lose
+  defp get_outcome("Y"), do: :draw
+  defp get_outcome("Z"), do: :win
+end
+```
+
+```elixir
+defmodule Game do
+  def match(player) do
+    cond do
+      player.outcome == :win ->
+        6 + result(player).points
+
+      player.outcome == :lose ->
+        result(player).points
+
+      true ->
+        3 + result(player).points
+    end
+  end
+
+  defp result(%{move: move, outcome: :draw}), do: Player.new(move, :draw)
+
+  defp result(%{move: :rock, outcome: :win}), do: Player.new(:paper, :win)
+  defp result(%{move: :rock, outcome: :lose}), do: Player.new(:scissors, :lose)
+
+  defp result(%{move: :paper, outcome: :win}), do: Player.new(:scissors, :win)
+  defp result(%{move: :paper, outcome: :lose}), do: Player.new(:rock, :lose)
+
+  defp result(%{move: :scissors, outcome: :win}), do: Player.new(:rock, :win)
+  defp result(%{move: :scissors, outcome: :lose}), do: Player.new(:paper, :lose)
+end
+```
+
+```elixir
+input
+|> Kino.Input.read()
+|> String.split(["\n", "\s"])
+|> Enum.chunk_every(2)
+|> Enum.map(fn [move, desired_outcome] ->
+  player_bet = Player.new(move, desired_outcome)
+  Game.match(player_bet)
+end)
+|> Enum.sum()
+```

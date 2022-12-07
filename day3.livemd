@@ -1,0 +1,106 @@
+# Day 3
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.7.0"}
+])
+```
+
+## Common
+
+```elixir
+alphabet = "abcdefghijklmnopqrstuvwxyz"
+all_letters = alphabet <> String.upcase(alphabet)
+
+numbers =
+  all_letters
+  |> String.graphemes()
+  |> then(&Range.new(1, Enum.count(&1)))
+  |> Enum.to_list()
+
+priorities = Enum.zip(String.graphemes(all_letters), numbers)
+```
+
+### Part1
+
+```elixir
+input = Kino.Input.textarea("Add the input:")
+```
+
+```elixir
+# [24, 32, 18, 30, 16, 24]
+rucksacks =
+  input
+  |> Kino.Input.read()
+  |> String.split("\n")
+  |> Enum.map(fn item ->
+    position = item |> String.graphemes() |> Enum.count()
+    {first, second} = String.split_at(item, div(position, 2))
+    first = MapSet.new(String.graphemes(first)) |> MapSet.to_list()
+    second = MapSet.new(String.graphemes(second)) |> MapSet.to_list()
+    {first, second}
+  end)
+```
+
+```elixir
+both_compartiments =
+  rucksacks
+  |> Enum.reduce([], fn {item, item2}, acc ->
+    item3 = item -- item2
+    [hd(item -- item3) | acc]
+  end)
+```
+
+```elixir
+both_compartiments
+|> Enum.map(fn compartiment_letter ->
+  {_letter, priority} =
+    Enum.find(priorities, fn {letter, _priority} ->
+      letter == compartiment_letter
+    end)
+
+  priority
+end)
+|> Enum.sum()
+```
+
+### Part 2
+
+```elixir
+input = Kino.Input.textarea("Add the input:")
+```
+
+```elixir
+# [24, 32, 18, 30, 16, 24]
+rucksacks =
+  input
+  |> Kino.Input.read()
+  |> String.split("\n", trim: true)
+  |> Enum.chunk_every(3)
+  |> Enum.map(fn lines ->
+    lines
+    |> Enum.map(fn line ->
+      line
+      |> String.graphemes()
+      |> MapSet.new()
+      |> MapSet.to_list()
+    end)
+    |> List.flatten()
+    |> Enum.frequencies()
+    |> Enum.find(fn {key, value} -> value == 3 end)
+    |> then(&elem(&1, 0))
+  end)
+```
+
+```elixir
+rucksacks
+|> Enum.map(fn badge ->
+  {_letter, priority} =
+    Enum.find(priorities, fn {letter, _priority} ->
+      letter == badge
+    end)
+
+  priority
+end)
+|> Enum.sum()
+```
