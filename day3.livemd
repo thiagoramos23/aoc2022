@@ -71,7 +71,6 @@ input = Kino.Input.textarea("Add the input:")
 ```
 
 ```elixir
-# [24, 32, 18, 30, 16, 24]
 rucksacks =
   input
   |> Kino.Input.read()

@@ -1,0 +1,57 @@
+# Day 4
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.7.0"}
+])
+```
+
+## Section
+
+```elixir
+input = Kino.Input.textarea("Input your data:")
+```
+
+### Part 1
+
+```elixir
+input
+|> Kino.Input.read()
+|> String.split("\n", trim: true)
+|> Enum.map(fn item ->
+  [section1, section2] = item |> String.split(",")
+  [first1, last1] = section1 |> String.split("-") |> Enum.map(&String.to_integer(&1))
+  [first2, last2] = section2 |> String.split("-") |> Enum.map(&String.to_integer(&1))
+
+  cond do
+    first1 <= first2 && last1 >= last2 ->
+      true
+
+    first1 >= first2 && last1 <= last2 ->
+      true
+
+    true ->
+      false
+  end
+end)
+|> Enum.reject(&(&1 == false))
+|> Enum.count()
+```
+
+### Part 2
+
+```elixir
+input
+|> Kino.Input.read()
+|> String.split("\n", trim: true)
+|> Enum.map(fn item ->
+  [section1, section2] = item |> String.split(",")
+  [first1, last1] = section1 |> String.split("-") |> Enum.map(&String.to_integer(&1))
+  [first2, last2] = section2 |> String.split("-") |> Enum.map(&String.to_integer(&1))
+  range1 = Range.new(first1, last1)
+  range2 = Range.new(first2, last2)
+  Range.disjoint?(range1, range2)
+end)
+|> Enum.reject(&(&1 == true))
+|> Enum.count()
+```
