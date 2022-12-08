@@ -1,0 +1,145 @@
+# Day 5
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.7.0"}
+])
+```
+
+## Section
+
+```elixir
+input = Kino.Input.textarea("Add your input data:")
+```
+
+### Part 1
+
+<!-- livebook:{"break_markdown":true} -->
+
+Testing Stack
+
+```elixir
+stacks = [
+  ["Z", "N"],
+  ["M", "C", "D"],
+  ["P"]
+]
+```
+
+Part 1 Stack
+
+```elixir
+#             [G] [W]         [Q]    
+# [Z]         [Q] [M]     [J] [F]    
+# [V]         [V] [S] [F] [N] [R]    
+# [T]         [F] [C] [H] [F] [W] [P]
+# [B] [L]     [L] [J] [C] [V] [D] [V]
+# [J] [V] [F] [N] [T] [T] [C] [Z] [W]
+# [G] [R] [Q] [H] [Q] [W] [Z] [G] [B]
+# [R] [J] [S] [Z] [R] [S] [D] [L] [J]
+stacks = [
+  ["R", "G", "J", "B", "T", "V", "Z"],
+  ["J", "R", "V", "L"],
+  ["S", "Q", "F"],
+  ["Z", "H", "N", "L", "F", "V", "Q", "G"],
+  ["R", "Q", "T", "J", "C", "S", "M", "W"],
+  ["S", "W", "T", "C", "H", "F"],
+  ["D", "Z", "C", "V", "F", "N", "J"],
+  ["L", "G", "Z", "D", "W", "R", "F", "Q"],
+  ["J", "B", "W", "V", "P"]
+]
+```
+
+```elixir
+moves =
+  input
+  |> Kino.Input.read()
+  |> String.split("\n")
+  |> Enum.map(fn string ->
+    Regex.scan(~r/\d+/, string)
+    |> List.flatten()
+    |> Enum.map(&String.to_integer/1)
+  end)
+```
+
+```elixir
+moves
+|> Enum.reduce(stacks, fn [move, from, to], acc ->
+  from_stack = acc |> Enum.at(from - 1)
+
+  new_from_stack =
+    from_stack
+    |> Enum.reverse()
+    |> Enum.drop(move)
+    |> Enum.reverse()
+
+  itens_to_move = (from_stack -- new_from_stack) |> Enum.reverse()
+
+  to_stack =
+    acc
+    |> Enum.at(to - 1)
+
+  new_to_stack = List.flatten(to_stack ++ itens_to_move)
+
+  acc =
+    acc
+    |> List.replace_at(from - 1, new_from_stack)
+    |> List.replace_at(to - 1, new_to_stack)
+
+  acc
+end)
+|> Enum.map(&List.last(&1))
+|> Enum.join("")
+```
+
+### Part 2
+
+<!-- livebook:{"break_markdown":true} -->
+
+### Part 2 Input
+
+```elixir
+input = Kino.Input.textarea("Insert part 2 input")
+```
+
+```elixir
+moves =
+  input
+  |> Kino.Input.read()
+  |> String.split("\n")
+  |> Enum.map(fn string ->
+    Regex.scan(~r/\d+/, string)
+    |> List.flatten()
+    |> Enum.map(&String.to_integer/1)
+  end)
+```
+
+```elixir
+moves
+|> Enum.reduce(stacks, fn [move, from, to], acc ->
+  from_stack = acc |> Enum.at(from - 1)
+
+  new_from_stack =
+    from_stack
+    |> Enum.reverse()
+    |> Enum.drop(move)
+    |> Enum.reverse()
+
+  itens_to_move = from_stack -- new_from_stack
+
+  to_stack =
+    acc
+    |> Enum.at(to - 1)
+
+  new_to_stack = List.flatten(to_stack ++ itens_to_move)
+
+  acc =
+    acc
+    |> List.replace_at(from - 1, new_from_stack)
+    |> List.replace_at(to - 1, new_to_stack)
+
+  acc
+end)
+|> Enum.map(&List.last(&1))
+|> Enum.join("")
+```
